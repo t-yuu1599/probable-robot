@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="牛肉判定">
+    
+    <title>牛肉マーブリング判定システム</title>
+    <meta name="description" content="上カルビ/並カルビの即座判定 - PWAアプリ">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- アイコン -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/static/icons/icon-512.png">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- カスタムCSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+</head>
+<body>
+    <!-- インストールプロンプト -->
+    <div id="installPrompt" class="alert alert-info alert-dismissible fade show d-none" role="alert">
+        <i class="bi bi-download"></i>
+        <strong>アプリをインストール</strong> - ホーム画面に追加して簡単アクセス！
+        <button type="button" class="btn btn-sm btn-outline-primary ms-2" id="installButton">
+            <i class="bi bi-plus-square"></i> インストール
+        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- メインコンテナ -->
+    <div class="container-fluid">
+        <!-- ヘッダー -->
+        <header class="row bg-primary text-white py-3 mb-4">
+            <div class="col-12 text-center">
+                <h1 class="h3 mb-0">
+                    <i class="bi bi-camera-fill"></i>
+                    🥩 牛肉マーブリング判定
+                </h1>
+                <small class="text-light">上カルビ / 並カルビ 即座判定</small>
+            </div>
+        </header>
+
+        <!-- メインコンテンツエリア -->
+        <main class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                
+                <!-- カメラセクション -->
+                <section class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-camera"></i> カメラ撮影
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <!-- カメラビューエリア -->
+                        <div id="cameraContainer" class="camera-container mb-3">
+                            <video id="cameraVideo" class="camera-view" autoplay playsinline></video>
+                            <canvas id="captureCanvas" class="d-none"></canvas>
+                            
+                            <!-- プレビュー画像 -->
+                            <div id="imagePreview" class="image-preview d-none">
+                                <img id="previewImage" class="preview-img" alt="撮影画像">
+                                <div class="preview-overlay">
+                                    <button class="btn btn-sm btn-outline-light" id="retakeButton">
+                                        <i class="bi bi-arrow-clockwise"></i> 再撮影
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- カメラ未対応メッセージ -->
+                            <div id="noCameraMessage" class="alert alert-warning d-none">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                カメラが利用できません。ファイルを選択してください。
+                            </div>
+                        </div>
+                        
+                        <!-- 操作ボタン -->
+                        <div class="camera-controls">
+                            <button id="captureButton" class="btn btn-success btn-lg me-2">
+                                <i class="bi bi-camera-fill"></i> 撮影
+                            </button>
+                            <button id="fileButton" class="btn btn-outline-primary btn-lg">
+                                <i class="bi bi-folder-open"></i> ファイル選択
+                            </button>
+                            <input type="file" id="fileInput" class="d-none" accept="image/*">
+                        </div>
+                        
+                        <!-- 判定ボタン -->
+                        <div class="prediction-controls mt-3 d-none" id="predictionControls">
+                            <button id="predictButton" class="btn btn-warning btn-lg">
+                                <i class="bi bi-cpu"></i> 判定実行
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 判定結果セクション -->
+                <section class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-bar-chart"></i> 判定結果
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- 待機状態 -->
+                        <div id="resultWaiting" class="text-center text-muted">
+                            <i class="bi bi-hourglass-split fs-1"></i>
+                            <p class="mt-2">判定待機中...</p>
+                        </div>
+                        
+                        <!-- 処理中状態 -->
+                        <div id="resultProcessing" class="text-center d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">処理中...</span>
+                            </div>
+                            <p class="mt-2">判定処理中...</p>
+                        </div>
+                        
+                        <!-- 判定結果表示 -->
+                        <div id="resultDisplay" class="d-none">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="result-card p-3 rounded">
+                                        <div class="result-classification">
+                                            <i class="bi bi-award-fill fs-1"></i>
+                                            <h3 id="classificationText" class="classification-text"></h3>
+                                            <span id="predictionBadge" class="badge badge-result"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="result-details">
+                                        <div class="confidence-display">
+                                            <label class="form-label">信頼度</label>
+                                            <div class="progress mb-2">
+                                                <div id="confidenceBar" class="progress-bar" role="progressbar"></div>
+                                            </div>
+                                            <span id="confidenceText" class="fw-bold"></span>
+                                        </div>
+                                        
+                                        <div class="processing-time mt-3">
+                                            <label class="form-label">処理時間</label>
+                                            <p id="processingTime" class="mb-0"></p>
+                                        </div>
+                                        
+                                        <div class="timestamp mt-3">
+                                            <label class="form-label">判定日時</label>
+                                            <p id="timestampText" class="mb-0 text-muted"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- エラー表示 -->
+                        <div id="resultError" class="alert alert-danger d-none">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>エラーが発生しました</strong>
+                            <p id="errorMessage" class="mb-0 mt-2"></p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- システム情報セクション -->
+                <section class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle"></i> システム情報
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="system-status">
+                                    <label class="form-label">システム状態</label>
+                                    <div id="systemStatus" class="status-indicator">
+                                        <span class="badge bg-secondary">確認中...</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="model-info">
+                                    <label class="form-label">モデル情報</label>
+                                    <div id="modelInfo" class="text-muted">
+                                        読み込み中...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="connection-status">
+                                    <label class="form-label">接続状態</label>
+                                    <div id="connectionStatus" class="status-indicator">
+                                        <span class="badge bg-info">確認中...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- フッター -->
+        <footer class="row mt-5">
+            <div class="col-12 text-center text-muted py-3">
+                <small>
+                    🥩 牛肉マーブリング判定システム PWA版 v1.0<br>
+                    © 2025 AI開発支援システム
+                </small>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast通知エリア -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="notificationToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i id="toastIcon" class="bi bi-info-circle me-2"></i>
+                <strong class="me-auto" id="toastTitle">通知</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+                メッセージ
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/camera.js"></script>
+    <script src="/static/js/prediction.js"></script>
+    
+    <!-- Service Worker登録 -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/js/sw.js')
+                    .then(registration => {
+                        console.log('✓ Service Worker登録成功:', registration);
+                    })
+                    .catch(error => {
+                        console.error('✗ Service Worker登録失敗:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html> 

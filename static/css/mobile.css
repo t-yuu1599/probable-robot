@@ -1,0 +1,381 @@
+/*
+牛肉マーブリング判定システム PWA版
+モバイル特化スタイルシート
+
+概要:
+- スマートフォン・タブレット向け最適化
+- タッチ操作対応
+- PWA特有のUI調整
+- iOS/Android対応
+*/
+
+/* ===== モバイル基本設定 ===== */
+@media (max-width: 768px) {
+    
+    /* ===== タッチ対応 ===== */
+    .btn, .card, .badge {
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+        touch-action: manipulation;
+    }
+    
+    /* ===== ヘッダー調整 ===== */
+    header.bg-primary {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        margin-bottom: 0 !important;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    header small {
+        font-size: 0.8rem;
+    }
+    
+    /* ===== カメラビュー最適化 ===== */
+    .camera-container {
+        margin: 0 -15px;
+        border-radius: 0;
+        max-width: none;
+    }
+    
+    .camera-view {
+        width: 100vw;
+        max-height: 50vh;
+        object-fit: cover;
+    }
+    
+    .preview-img {
+        width: 100vw;
+        max-height: 50vh;
+        object-fit: cover;
+        border-radius: 0;
+    }
+    
+    /* ===== ボタン調整 ===== */
+    .camera-controls {
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+    }
+    
+    .btn-lg {
+        padding: 15px 25px;
+        font-size: 1rem;
+        min-height: 50px;
+        border-radius: 25px;
+    }
+    
+    .camera-controls .btn {
+        display: block;
+        width: 100%;
+        margin: 5px 0;
+    }
+    
+    .camera-controls .btn:first-child {
+        margin-bottom: 10px;
+    }
+    
+    /* ===== 判定結果モバイル調整 ===== */
+    .result-display .row {
+        flex-direction: column;
+    }
+    
+    .result-card {
+        margin-bottom: 20px;
+        padding: 20px !important;
+    }
+    
+    .classification-text {
+        font-size: 1.8rem;
+        margin: 15px 0;
+    }
+    
+    .badge-result {
+        font-size: 0.9rem;
+        padding: 10px 20px;
+    }
+    
+    /* ===== プログレスバー調整 ===== */
+    .confidence-display .progress {
+        height: 25px;
+        margin-bottom: 10px;
+    }
+    
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    
+    /* ===== カード調整 ===== */
+    .card {
+        margin-bottom: 15px;
+    }
+    
+    .card-body {
+        padding: 15px;
+    }
+    
+    .card-header {
+        padding: 12px 15px;
+    }
+    
+    .card-header h5 {
+        font-size: 1.1rem;
+    }
+    
+    /* ===== システム情報調整 ===== */
+    .system-status,
+    .model-info,
+    .connection-status {
+        margin-bottom: 15px;
+    }
+    
+    .status-indicator .badge {
+        font-size: 0.8rem;
+        padding: 8px 12px;
+    }
+    
+    /* ===== Toast通知調整 ===== */
+    .toast-container {
+        position: fixed !important;
+        top: 10px !important;
+        bottom: auto !important;
+        left: 10px !important;
+        right: 10px !important;
+        z-index: 1060;
+    }
+    
+    .toast {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    /* ===== フッター調整 ===== */
+    footer {
+        margin-top: 30px;
+        padding: 15px 0;
+    }
+    
+    footer small {
+        font-size: 0.75rem;
+        line-height: 1.4;
+    }
+}
+
+/* ===== 小画面対応 (iPhone SE など) ===== */
+@media (max-width: 375px) {
+    
+    .container-fluid {
+        padding: 0 10px;
+    }
+    
+    .btn-lg {
+        padding: 12px 20px;
+        font-size: 0.95rem;
+        min-height: 45px;
+    }
+    
+    .classification-text {
+        font-size: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 12px;
+    }
+    
+    header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .camera-view,
+    .preview-img {
+        max-height: 40vh;
+    }
+}
+
+/* ===== 横向き対応 ===== */
+@media (max-width: 768px) and (orientation: landscape) {
+    
+    header.bg-primary {
+        position: relative;
+        padding: 10px 0;
+    }
+    
+    .camera-view,
+    .preview-img {
+        max-height: 60vh;
+    }
+    
+    .card-body {
+        padding: 10px;
+    }
+    
+    .result-card {
+        padding: 15px !important;
+    }
+    
+    .classification-text {
+        font-size: 1.5rem;
+        margin: 10px 0;
+    }
+}
+
+/* ===== PWA特有のスタイル ===== */
+
+/* Standalone表示時の調整 */
+@media (display-mode: standalone) {
+    
+    body {
+        /* iOS Safari のステータスバー対応 */
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    header.bg-primary {
+        /* ノッチ対応 */
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+    
+    .container-fluid {
+        /* セーフエリア対応 */
+        padding-left: max(15px, env(safe-area-inset-left));
+        padding-right: max(15px, env(safe-area-inset-right));
+    }
+}
+
+/* ===== iOS特有の調整 ===== */
+@supports (-webkit-touch-callout: none) {
+    
+    /* iOS Safari のバウンス無効化 */
+    body {
+        overscroll-behavior: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* iOS のズーム無効化 */
+    input, button, textarea, select {
+        font-size: 16px;
+    }
+    
+    /* iOS のタップハイライト調整 */
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .btn, .card {
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* ===== Android特有の調整 ===== */
+@media (max-width: 768px) {
+    
+    /* Android のスクロールバー非表示 */
+    ::-webkit-scrollbar {
+        width: 0;
+        background: transparent;
+    }
+    
+    /* Android のナビゲーションバー対応 */
+    .container-fluid {
+        padding-bottom: max(15px, env(safe-area-inset-bottom));
+    }
+}
+
+/* ===== ダークモード対応 ===== */
+@media (prefers-color-scheme: dark) {
+    
+    body {
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+    }
+    
+    .card {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, #2d2d2d 0%, #3d3d3d 100%) !important;
+        color: #e0e0e0;
+        border-bottom-color: #444;
+    }
+    
+    .camera-container {
+        background: #000;
+    }
+    
+    .result-card {
+        background: linear-gradient(135deg, #2d2d2d 0%, #3d3d3d 100%);
+        border-color: #444;
+        color: #e0e0e0;
+    }
+    
+    .result-card.high-grade {
+        background: linear-gradient(135deg, #1a2e1a 0%, #2d3d2d 100%);
+        border-color: #27ae60;
+        color: #4ade80;
+    }
+    
+    .result-card.low-grade {
+        background: linear-gradient(135deg, #2e251a 0%, #3d352d 100%);
+        border-color: #f39c12;
+        color: #fbbf24;
+    }
+}
+
+/* ===== 高解像度ディスプレイ対応 ===== */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    
+    .btn {
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    .card {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+    
+    .text-shadow {
+        text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.15);
+    }
+}
+
+/* ===== アクセシビリティ対応 ===== */
+@media (prefers-reduced-motion: reduce) {
+    
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .fade-in, .pulse {
+        animation: none;
+    }
+}
+
+/* ===== バッテリー節約モード対応 ===== */
+@media (prefers-reduced-motion: reduce) and (prefers-color-scheme: dark) {
+    
+    body {
+        background-color: #000;
+    }
+    
+    .card {
+        background-color: #111;
+    }
+    
+    .btn {
+        box-shadow: none;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #333;
+    }
+} 
